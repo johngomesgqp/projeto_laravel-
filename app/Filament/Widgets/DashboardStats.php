@@ -14,25 +14,20 @@ class DashboardStats extends StatsOverviewWidget
         return [
             Stat::make('Agendamentos', Event::count())
                 ->icon('heroicon-o-calendar')
-                ->url(EventResource::getUrl()),
+                ->url(EventResource::getUrl('index')),
 
             Stat::make('Pendentes', Event::where('status', 'pending')->count())
                 ->icon('heroicon-o-clock')
                 ->color('warning')
-                ->url(EventResource::getUrl('index', [
-                    'tableFilters' => [
-                        'pending' => ['value' => true],
-                    ],
-                ])),
+                ->url(EventResource::getUrl('index') . '?status=pending'
+                ),
 
             Stat::make('Concluídos', Event::where('status', 'done')->count())
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
-                ->url(EventResource::getUrl('index', [
-                    'tableFilters' => [
-                        'done' => ['value' => true],
-                    ],
-                ])),
+                 ->url(EventResource::getUrl('index') . '?status=done'),
+                 
         ];
     }
 }
+

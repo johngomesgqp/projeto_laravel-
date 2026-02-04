@@ -9,8 +9,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
-use Filament\Tables\Filters\Filter;
-use App\Models\Event;
+use Filament\Tables\Filters\SelectFilter; 
 
 class EventsTable
 {
@@ -59,15 +58,13 @@ class EventsTable
 
             ->filters([
                 // Filtro "Concluídos"
-
-                Filter::make('pending')
-                    ->label('Pendentes')
-                    ->query(fn($query) => $query->where('status', 'pending'))
-                    ->default(),
-
-                Filter::make('done')
-                    ->label('Concluídos')
-                    ->query(fn($query) => $query->where('status', 'done')),
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        'pending' => 'Pendentes',
+                        'done' => 'Concluídos',
+                        
+                    ])
             ])
 
             ->recordActions([

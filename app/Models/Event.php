@@ -21,6 +21,21 @@ class Event extends Model // Criação de uma classe chamada Event que herda tud
             }
         });
     }
+    public function scopeAgendamentos($query)
+    {
+        return $query->whereNull('deleted_at');
+    }
+
+    public function scopePendentes($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopeConcluidos($query)
+    {
+        return $query->where('status', 'done');
+    }
+
 
     protected $fillable = [ // serve para criar uma lista de campos permitidos para preenchimento automático existe por segurnaça para evitar o envio de daods indevidos e o laravel aceitar
         'user_id',       // ID do usuário que criou o evento

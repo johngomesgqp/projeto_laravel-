@@ -5,13 +5,16 @@ namespace App\Filament\Resources\Events\Pages;
 use App\Filament\Resources\Events\EventResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation; 
+
 
 class ListEvents extends ListRecords
 {
     protected static string $resource = EventResource::class;
 
-    
-    protected bool $persistFilters = false; //mpede que o Filament “lembre” filtros antigos Cada navegação começa limpa
+
+    protected bool $persistFilters = true; //mpede que o Filament “lembre” filtros antigos Cada navegação começa limpa
 
     protected function getHeaderActions(): array
     {
@@ -21,13 +24,16 @@ class ListEvents extends ListRecords
         ];
     }
 
-  
-    protected function getDefaultTableFilters(): array
+    // A assinatura precisa incluir o tipo de retorno correto
+    protected function getTableQuery(): Builder|Relation|null
     {
-        return [
-            'pending' => [
-                'isActive' => true,
-            ],
-        ];
+        $query = static::$resource::getEloquentQuery();
+
+        // Filtro opcional via dashboard
+        if ($status = request('status')) {
+            $query->where('status', $status);
+        }
+
+        return $query;
     }
 }
