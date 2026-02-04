@@ -21,4 +21,13 @@ class ListEvents extends ListRecords
         ];
     }
 
+  
+    protected function getDefaultTableFilters(): array
+    {
+        return [
+            'pending' => [
+                'isActive' => true,
+            ],
+        ];
+    }
 }

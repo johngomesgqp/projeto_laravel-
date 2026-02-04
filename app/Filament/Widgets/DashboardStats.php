@@ -12,54 +12,25 @@ class DashboardStats extends StatsOverviewWidget
     protected function getStats(): array
     {
         return [
-            Stat::make(
-                'Agendamentos',
-                Event::where('status', 'pending')->count()
-            )
+            Stat::make('Agendamentos', Event::count())
                 ->icon('heroicon-o-calendar')
-                ->color('warning')
-                ->url(EventResource::getUrl('index', [
-                    'tableFilters' => [
-                        'pending' => ['isActive' => true],
-                    ],
-                ])),
+                ->url(EventResource::getUrl()),
 
-            // Pendentes
-            Stat::make(
-                'Pendentes',
-                Event::where('status', 'pending')->count()
-            )
+            Stat::make('Pendentes', Event::where('status', 'pending')->count())
                 ->icon('heroicon-o-clock')
                 ->color('warning')
                 ->url(EventResource::getUrl('index', [
                     'tableFilters' => [
-                        'pending' => ['isActive' => true],
+                        'pending' => ['value' => true],
                     ],
                 ])),
 
-            //Concluídos
-            Stat::make(
-                'Concluídos',
-                Event::where('status', 'done')->count()
-            )
+            Stat::make('Concluídos', Event::where('status', 'done')->count())
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
                 ->url(EventResource::getUrl('index', [
                     'tableFilters' => [
-                        'done' => ['isActive' => true],
-                    ],
-                ])),
-
-            //  Apagados
-            Stat::make(
-                'Apagados',
-                Event::onlyTrashed()->count()
-            )
-                ->icon('heroicon-o-trash')
-                ->color('danger')
-                ->url(EventResource::getUrl('index', [
-                    'tableFilters' => [
-                        'deleted' => ['isActive' => true],
+                        'done' => ['value' => true],
                     ],
                 ])),
         ];

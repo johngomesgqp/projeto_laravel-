@@ -11,7 +11,6 @@ use Filament\Tables\Table;
 use Filament\Actions\Action;
 use Filament\Tables\Filters\Filter;
 use App\Models\Event;
-use Carbon\Carbon;
 
 class EventsTable
 {
@@ -63,15 +62,12 @@ class EventsTable
 
                 Filter::make('pending')
                     ->label('Pendentes')
-                    ->query(fn($query) => $query->where('status', 'pending')),
+                    ->query(fn($query) => $query->where('status', 'pending'))
+                    ->default(),
 
                 Filter::make('done')
                     ->label('Concluídos')
                     ->query(fn($query) => $query->where('status', 'done')),
-
-                Filter::make('deleted')
-                    ->label('Apagados')
-                    ->query(fn($query) => $query->onlyTrashed()),
             ])
 
             ->recordActions([
