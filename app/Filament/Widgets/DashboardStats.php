@@ -13,7 +13,7 @@ class DashboardStats extends StatsOverviewWidget
     {
         return [
             Stat::make('Agendamentos', Event::withTrashed()->count())
-            ->description('Agenda mentos Realizados')
+            ->description('Agendamentos Realizados')
                 ->icon('heroicon-o-calendar')
                 ->url(EventResource::getUrl('index') . '?status=todos'), //novo utilziado para pegar os evenbtos de todos os staus
 
@@ -39,3 +39,6 @@ class DashboardStats extends StatsOverviewWidget
         ];
     }
 }
+
+
+

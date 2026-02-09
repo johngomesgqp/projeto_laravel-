@@ -16,55 +16,49 @@ class ListEvents extends ListRecords
     protected static string $resource = EventResource::class;
 
 
-    protected bool $persistFilters = true; //mpede que o Filament “lembre” filtros antigos Cada navegação começa limpa
+    protected bool $persistFilters = true; // impede que o Filament “lembre” filtros antigos, cada navegação começa limpa
 
-    protected function getHeaderActions(): array
+    protected function getHeaderActions(): array   // Cabeçalho: botão de criar novo evento
     {
         return [
             CreateAction::make()
                 ->label('Novo Agendamento'), // Botão de criação está em português: Novo Agendamento.
         ];
     }
+
     protected function getTableQuery(): Builder|Relation|null
     {
-        $query = static::$resource::getEloquentQuery();
+        $query = static::$resource::getEloquentQuery();  // Query da tabela ajustada conforme filtro de status
         if ($status = request('status')) {
-            match ($status) {
+            //  match ($status)
+            $query = match ($status) { // linha nova
                 'pendentes'  => $query->where('status', 'pending'),
                 'concluidos' => $query->where('status', 'done'),
                 'apagados'   => $query->onlyTrashed(),
                 'todos'      => $query->withTrashed(),
-                default      => null,
-             };
-            } else {
-                // comportamento padrão: só ativos
-                $query->whereNull('deleted_at');
-            }
-            return $query;
+                // default      => null,
+                default      => $query, // linha nova
+            };
+        // } else {
+        //     // comportamento padrão: só ativos
+        //     $query->whereNull('deleted_at');
         }
+        return $query;
+    }
 
-    // Sobrescrevendo query para filtros do dashboard
-    // protected function getTableQuery(): Builder|Relation|null funcionando ------
-    // {
-    //     $query = static::$resource::getEloquentQuery(); funcionando -----
+    // Título dinâmico no topo da página (compatível com Filament v5)
+    public function getHeading(): ?string
+    {
+        return match (request('status')) {
+            'pendentes'  => 'Eventos Pendentes',
+            'concluidos' => 'Eventos Concluídos',
+            'apagados'   => 'Eventos Apagados',
+            'todos'      => 'Todos os Eventos',
+            default      => 'Eventos Ativos',
+        };
+    }
 
-        // Filtro opcional via dashboard
-        // if ($status = request('status')) {
-        //     $query->where('status', $status);
-        // }
-        // novo // Verifica se existe filtro via query stringstring do dashboard,  
-    //    if ($status = request('status')) { funcionando ---------------
-    //     $query = match($status) {
-    //         'pendentes' => $query->where('status', 'pending'),
-    //         'concluidos' => $query->where('status', 'done'),
-    //         'apagados' => $query->onlyTrashed(),
-    //         'todos' => $query->withTrashed(),
-    //         default => $query,
-    //     };
-    // } //novo
-
-        // return $query; --- funcionando 
-    // }
+    // Ajuste para incluir/excluir eventos apagados
     public static function getEloquentQuery(): Builder //novo .....
     {
         $query = parent::getEloquentQuery();
@@ -80,7 +74,3 @@ class ListEvents extends ListRecords
         return $query;
     } //....novo
 }
-
-
-
-
