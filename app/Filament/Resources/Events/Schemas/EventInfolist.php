@@ -12,22 +12,35 @@ class EventInfolist
         return $schema
             ->components([
                 TextEntry::make('user.name')
-                    ->label('User'),
-                TextEntry::make('title'),
+                    ->label('Usuário'),
+
+                TextEntry::make('title')
+                    ->label('Título do Evento'),
+
                 TextEntry::make('description')
+                    ->label('Descrição')
                     ->placeholder('-')
                     ->columnSpanFull(),
+
                 TextEntry::make('starts_at')
-                    ->dateTime(),
+                    ->label('Início')
+                    ->dateTime('d/m/Y H:i:s'),
+
                 TextEntry::make('ends_at')
-                    ->dateTime(),
-                TextEntry::make('status'),
+                    ->label('Término')
+                    ->dateTime('d/m/Y H:i:s'),
+
+                TextEntry::make('status')
+                    ->label('Status'),
+
                 TextEntry::make('created_at')
-                    ->dateTime()
+                    ->label('Criado em:')
+                    ->dateTime('d/m/Y H:i:s')
                     ->placeholder('-'),
-                TextEntry::make('updated_at')
-                    ->dateTime()
-                    ->placeholder('-'),
+
+                // TextEntry::make('updated_at')
+                //     ->dateTime('d/m/Y H:i:s')
+                //     ->placeholder('-'),
             ]);
     }
 }

@@ -25,29 +25,46 @@ class ListEvents extends ListRecords
                 ->label('Novo Agendamento'), // Botão de criação está em português: Novo Agendamento.
         ];
     }
-
-    // Sobrescrevendo query para filtros do dashboard
     protected function getTableQuery(): Builder|Relation|null
     {
         $query = static::$resource::getEloquentQuery();
+        if ($status = request('status')) {
+            match ($status) {
+                'pendentes'  => $query->where('status', 'pending'),
+                'concluidos' => $query->where('status', 'done'),
+                'apagados'   => $query->onlyTrashed(),
+                'todos'      => $query->withTrashed(),
+                default      => null,
+             };
+            } else {
+                // comportamento padrão: só ativos
+                $query->whereNull('deleted_at');
+            }
+            return $query;
+        }
+
+    // Sobrescrevendo query para filtros do dashboard
+    // protected function getTableQuery(): Builder|Relation|null funcionando ------
+    // {
+    //     $query = static::$resource::getEloquentQuery(); funcionando -----
 
         // Filtro opcional via dashboard
         // if ($status = request('status')) {
         //     $query->where('status', $status);
         // }
         // novo // Verifica se existe filtro via query stringstring do dashboard,  
-       if ($status = request('status')) {
-        $query = match($status) {
-            'pendentes' => $query->where('status', 'pending'),
-            'concluidos' => $query->where('status', 'done'),
-            'apagados' => $query->onlyTrashed(),
-            'todos' => $query->withTrashed(),
-            default => $query,
-        };
-    } //novo
+    //    if ($status = request('status')) { funcionando ---------------
+    //     $query = match($status) {
+    //         'pendentes' => $query->where('status', 'pending'),
+    //         'concluidos' => $query->where('status', 'done'),
+    //         'apagados' => $query->onlyTrashed(),
+    //         'todos' => $query->withTrashed(),
+    //         default => $query,
+    //     };
+    // } //novo
 
-        return $query;
-    }
+        // return $query; --- funcionando 
+    // }
     public static function getEloquentQuery(): Builder //novo .....
     {
         $query = parent::getEloquentQuery();
@@ -63,3 +80,7 @@ class ListEvents extends ListRecords
         return $query;
     } //....novo
 }
+
+
+
+

@@ -10,7 +10,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
 use Filament\Tables\Filters\SelectFilter;
-
+use App\Filament\Resources\Events\EventResource; //novo
 
 
 class EventsTable
@@ -83,35 +83,53 @@ class EventsTable
             ])
 
             ->recordActions([
+
                 Action::make('done')
                     ->label('Concluir')
                     ->icon('heroicon-o-check')
                     ->color('success')
                     ->visible(fn($record) => $record->status !== 'done')
-                    ->action(fn($record) => $record->update(['status' => 'done'])),
+                    //->action(fn($record) => $record->update(['status' => 'done'])), 
+                    ->action(function ($record) { //novo redireciona para a seção correta após a ação. Concluir → ir para Concluídos após ação do botão
+                        $record->update(['status' => 'done']);
+                        return redirect(
+                            EventResource::getUrl('index', ['status' => 'concluidos'])
+                        );
+                    }), //novo
 
                 Action::make('delete')
                     ->label('Apagar')
                     ->icon('heroicon-o-trash')
                     ->color('danger')
                     ->visible(fn($record) => $record?->deleted_at === null) // só mostra se não estiver apagado
-                    ->action(fn($record) => $record->delete()),
+                    // ->action(fn($record) => $record->delete()),
+                    ->action(function ($record) {  //novo redireciona para a seção correta após a ação.  Apagar → ir para Apagados após ação do botão
+                        $record->delete();
+                        return redirect(
+                            EventResource::getUrl('index', ['status' => 'apagados'])
+                        );
+                    }), //novo
 
-                    //novo
+                //novo
                 Action::make('restore')
                     ->label('Restaurar')
-                    ->icon('heroicon-o-arrow-path') 
+                    ->icon('heroicon-o-arrow-path')
                     ->color('primary')
-                    ->visible(fn($record) => $record?->deleted_at !== null)
-                    ->action(fn($record) => $record->restore()), //novo
-
+                    ->visible(fn($record) => $record?->deleted_at !== null) 
+                    // ->action(fn($record) => $record->restore()), //novo
+                    ->action(function ($record) { //novo redireciona para a seção correta após a ação. Restaurar → ir para Pendentes após ação do botão
+                        $record->restore();
+                        return redirect(
+                            EventResource::getUrl('index', ['status' => 'pendentes'])
+                        );
+                    }),
 
                 ViewAction::make(),
 
                 EditAction::make()
                     ->visible(fn($record) => $record?->deleted_at === null && $record?->status !== 'done'),
             ])
-      
+
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
@@ -123,3 +141,4 @@ class EventsTable
             ]);
     }
 }
+
