@@ -12,7 +12,6 @@ use Filament\Actions\Action;
 use Filament\Tables\Filters\SelectFilter;
 use App\Filament\Resources\Events\EventResource; //novo
 
-
 class EventsTable
 {
     public static function configure(Table $table): Table
@@ -59,8 +58,9 @@ class EventsTable
                 //     ->toggleable(isToggledHiddenByDefault: true),
                 // parte do codigo removida por ser excesso de informação para o usuria, 
                 //removido para reduzir “poluição visual” 
+
             ])
-            ->filters([
+            ->filters([ // controle do filtro em um só lugar (antes estava no ListEvents)
                 SelectFilter::make('status')
                     ->label('Status')
                     ->options([
@@ -95,7 +95,8 @@ class EventsTable
                         return redirect(
                             EventResource::getUrl('index', ['status' => 'concluidos'])
                         );
-                    }), //novo
+                    }),
+                //novo
 
                 Action::make('delete')
                     ->label('Apagar')
@@ -108,21 +109,22 @@ class EventsTable
                         return redirect(
                             EventResource::getUrl('index', ['status' => 'apagados'])
                         );
-                    }), //novo
+                    }), 
+                    //novo
 
-                //novo
                 Action::make('restore')
                     ->label('Restaurar')
                     ->icon('heroicon-o-arrow-path')
                     ->color('primary')
-                    ->visible(fn($record) => $record?->deleted_at !== null) 
-                    // ->action(fn($record) => $record->restore()), //novo
-                    ->action(function ($record) { //novo redireciona para a seção correta após a ação. Restaurar → ir para Pendentes após ação do botão
+                    ->visible(fn($record) => $record->trashed())
+                    ->action(function ($record) { // redireciona para a seção correta após a ação. Restaurar → ir para Pendentes após ação do botão
                         $record->restore();
-                        return redirect(
-                            EventResource::getUrl('index', ['status' => 'pendentes'])
-                        );
+                        $record->update(['status' => 'pending']); // Atualiza o status para 'pending'
+                    })
+                    ->after(function ($livewire) {
+                        $livewire->dispatch('$refresh'); // restaura o registro
                     }),
+
 
                 ViewAction::make(),
 
@@ -141,4 +143,3 @@ class EventsTable
             ]);
     }
 }
-

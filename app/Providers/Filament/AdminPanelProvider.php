@@ -24,14 +24,17 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
+            ->sidebarCollapsibleOnDesktop() // adiciona a opção de ocultar as opçõies latareias
             ->default()
             ->id('admin')
             ->path('admin')
             ->brandName('Sistema de Agenda')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
+            ->font('SSmooch Sans')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => '#577ae4',
+                // 'gray' => Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

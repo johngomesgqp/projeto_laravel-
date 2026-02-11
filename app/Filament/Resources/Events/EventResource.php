@@ -16,12 +16,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletes; //novo
-use Filament\Schemas\Components\TextInput; //novo
-use Filament\Schemas\Components\Select; //novo
-use Filament\Schemas\Components\DateTimePicker; //novo
-use Filament\Tables\Filters\SelectFilter; //novo
-use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\SoftDeletingScope; //novo
+
 
 class EventResource extends Resource
 
@@ -36,7 +32,7 @@ class EventResource extends Resource
     {
         return EventForm::configure($schema);
     }
-    
+
     public static function infolist(Schema $schema): Schema
     {
         return EventInfolist::configure($schema);
@@ -53,11 +49,15 @@ class EventResource extends Resource
             //
         ];
     }
-    // public static function getEloquentQuery(): Builder
-    // {
-    //     return parent::getEloquentQuery();
-    // }
-
+    public static function getEloquentQuery(): Builder /// adicionado no lugar certo antes estava no ListEvents causando confusão
+    // ajuste para funcionamento dos filtros *Eventos ativos aparecem *Apagados também *Filtros passam a funcionar
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
+    
     public static function getPages(): array
     {
         return [
@@ -68,3 +68,4 @@ class EventResource extends Resource
         ];
     }
 }
+
