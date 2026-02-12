@@ -20,17 +20,33 @@ class ListEvents extends ListRecords
                 ->label('Novo Agendamento'),
         ];
     }
-// removido por que quem controla tudo é o EventsTable + Filter.
-    // protected function getTableQuery(): Builder
-    // {
-    //     $query = static::$resource::getEloquentQuery();
+      public function mount(): void //novo 1*O mount()Ele lê a URL (status=pendentes, status=concluidos, etc.)git 
+    {
+        parent::mount();
 
-    //     return match (request('status')) {
-    //         'pendentes'  => $query->where('status', 'pending'),
-    //         'concluidos' => $query->where('status', 'done'),
-    //         'apagados'   => $query->onlyTrashed(),
-    //         'todos'      => $query->withTrashed(),
-    //         default      => $query->whereNull('deleted_at'),
-    //     };
-    // }
-}
+        $status = request()->query('status');
+
+        if ($status) {
+            $this->tableFilters = match ($status) { //2*Traduz isso em filtros da tabela ($this->tableFilters)
+                'pendentes' => [
+                    'status' => ['value' => 'pending'],
+                    'trashed' => ['value' => 'ativos'],
+                ],
+                'concluidos' => [
+                    'status' => ['value' => 'done'],
+                    'trashed' => ['value' => 'ativos'],
+                ],
+                'apagados' => [
+                    'trashed' => ['value' => 'apagados'],
+                ],
+                'todos' => [
+                    'trashed' => ['value' => 'todos'],
+                ],
+                default => [],
+                // Tabela entende: “Ah, o usuário quer ver só os pendentes, e quero só os ativos”
+// É como quando você chega na escola e a professora diz:
+// “Hoje vamos brincar só com carrinhos” → todo mundo só olha para os carrinhos.
+            };
+        }
+    }
+} 
