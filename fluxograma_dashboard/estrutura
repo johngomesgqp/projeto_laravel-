@@ -1,0 +1,77 @@
+Fluxo Dashboard → Tabela → Restore (Versão Colorida)
+[Dashboard] 
+   │
+   ├── Pendentes ──▶ URL: ?status=pendentes
+   │                  │
+   │                  ▼
+   │         [Tabela Filtrada]
+   │         status = pending
+   │         trashed = ativos
+   │                  │
+   │                  ▼
+   │         🔶 Mostra só eventos pendentes (Amarelo)
+   │
+   ├── Concluídos ─▶ URL: ?status=concluidos
+   │                  │
+   │                  ▼
+   │         [Tabela Filtrada]
+   │         status = done
+   │         trashed = ativos
+   │                  │
+   │                  ▼
+   │         🟢 Mostra só eventos concluídos (Verde)
+   │
+   ├── Apagados ───▶ URL: ?status=apagados
+   │                  │
+   │                  ▼
+   │         [Tabela Filtrada]
+   │         trashed = apagados
+   │                  │
+   │                  ▼
+   │         🔴 Mostra só eventos apagados (Vermelho)
+   │                  │
+   │                  ▼
+   │         Se clicar Restore:
+   │                  │
+   │                  ▼
+   │         Evento restaurado
+   │         status = pending
+   │         Redireciona → URL: ?status=pendentes
+   │                  │
+   │                  ▼
+   │         🔶 Evento aparece em Pendentes (Amarelo)
+   │
+   └── Todos ─────▶ URL: ?status=todos
+                      │
+                      ▼
+               [Tabela Filtrada]
+               trashed = todos
+                      │
+                      ▼
+               ⚪ Mostra todos os eventos
+
+🟢 Legenda das cores:
+
+🔶 Amarelo → Pendentes
+
+🟢 Verde → Concluídos
+
+🔴 Vermelho → Apagados
+
+⚪ Cinza → Todos
+
+✅ Explicação simplificada:
+
+Cada botão no Dashboard envia uma intenção via URL (status=...).
+
+A página ListEvents lê a URL no mount() e transforma em filtros para a tabela.
+
+A tabela só mostra os registros correspondentes ao filtro.
+
+Se você clicar Restore em um evento apagado:
+
+Ele volta a existir (restore())
+
+Muda automaticamente para pendente
+
+Redireciona para Pendentes, para não quebrar a experiência do usuário.
