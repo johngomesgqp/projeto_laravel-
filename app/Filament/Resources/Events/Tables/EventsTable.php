@@ -12,6 +12,7 @@ use Filament\Actions\Action;
 use Filament\Tables\Filters\SelectFilter;
 use App\Filament\Resources\Events\EventResource; //novo
 
+
 class EventsTable
 {
     public static function configure(Table $table): Table
@@ -58,30 +59,59 @@ class EventsTable
                 //     ->toggleable(isToggledHiddenByDefault: true),
                 // parte do codigo removida por ser excesso de informação para o usuria, 
                 //removido para reduzir “poluição visual” 
-
             ])
-            ->filters([ // controle do filtro em um só lugar (antes estava no ListEvents)
-                SelectFilter::make('status')
+            // ->filters([
+            //     SelectFilter::make('status')
+            //         ->label('Status')
+            //         ->options([
+            //             'pending'  => 'Pendentes',
+            //             'done'     => 'Concluídos',
+            //             'apagados' => 'Apagados', //novo
+            //         ])
+            //         ->query(function ($query, array $data) {
+            //             if (empty($data['value'])) {   //novo ...
+            //                 return;
+            //             }
+
+            //             if ($data['value'] === 'apagados') {
+            //                 $query->onlyTrashed();
+            //                 return;
+            //             }
+
+            //             $query->where('status', $data['value']);   //....novo
+            //         }),
+            // ])
+            ->filters([ //novo // os filtros passam a ficar separados, Por que ?
+
+                \Filament\Tables\Filters\SelectFilter::make('status') // status → pendentes ou concluídos
                     ->label('Status')
                     ->options([
-                        'pending'  => 'Pendentes',
-                        'done'     => 'Concluídos',
-                        'apagados' => 'Apagados', //novo
+                        'pending' => 'Pendentes',
+                        'done'    => 'Concluídos',
+                    ]),
+
+                \Filament\Tables\Filters\SelectFilter::make('trashed') // trashed → ativos, apagados, todos
+                    ->label('Registros')
+                    ->options([
+                        'ativos'   => 'Ativos',
+                        'apagados' => 'Apagados',
+                        'todos'    => 'Todos',
                     ])
-                    ->query(function ($query, array $data) {
-                        if (empty($data['value'])) {   //novo ...
+                    ->query(function ($query, array $data) {// Dashboard funciona sem confundir os filtros
+                        if (empty($data['value'])) {
                             return;
                         }
 
-                        if ($data['value'] === 'apagados') {
-                            $query->onlyTrashed();
-                            return;
-                        }
-
-                        $query->where('status', $data['value']);   //....novo
+                        return match ($data['value']) { // Restore volta para pendente sem travar
+                            'apagados' => $query->onlyTrashed(),
+                            'todos'    => $query->withTrashed(),
+                            default    => $query->whereNull('deleted_at'),
+                            // Livewire não mantém filtros antigos em memória
+// É como ter duas caixas de brinquedo, cada uma cuidando de uma coisa, em vez de misturar tudo na mesma caixa.
+                        };
                     }),
-            ])
-
+            ]) //novo
+            
             ->recordActions([
 
                 Action::make('done')
@@ -95,8 +125,7 @@ class EventsTable
                         return redirect(
                             EventResource::getUrl('index', ['status' => 'concluidos'])
                         );
-                    }),
-                //novo
+                    }), //novo
 
                 Action::make('delete')
                     ->label('Apagar')
@@ -109,26 +138,41 @@ class EventsTable
                         return redirect(
                             EventResource::getUrl('index', ['status' => 'apagados'])
                         );
-                    }), 
-                    //novo
+                    }),
 
-                Action::make('restore')
+                Action::make('restore') //novo
                     ->label('Restaurar')
                     ->icon('heroicon-o-arrow-path')
                     ->color('primary')
-                    ->visible(fn($record) => $record->trashed())
-                    ->action(function ($record) { // redireciona para a seção correta após a ação. Restaurar → ir para Pendentes após ação do botão
+                    ->visible(fn($record) => $record?->deleted_at !== null)
+                    //->action(function ($record) { //novo redireciona para a seção correta após a ação. Restaurar → ir para Pendentes após ação do botão
+                    //$record->restore();
+                    //return redirect(
+                    //EventResource::getUrl('index', ['status' => 'pendentes'])
+                    //);
+                    //}), // não mudava o status. Quando tentávamos integrar com getTableQuery() ou filtros da URL, 
+                    // ele voltava “concluído” porque o filtro anterior ainda estava ativo em memória.
+                    ->action(function ($record) { //novo
+
                         $record->restore();
-                        $record->update(['status' => 'pending']); // Atualiza o status para 'pending'
-                    })
-                    ->after(function ($livewire) {
-                        $livewire->dispatch('$refresh'); // restaura o registro
-                    }),
 
+                        $record->update([ //Atualizar o status para pending
+                            'status' => 'pending',
+                        ]);
 
-                ViewAction::make(),
+                        return redirect( //Redirecionar para Dashboard (URL: status=pendentes)
+                            \App\Filament\Resources\Events\EventResource::getUrl('index', [
+                                'status' => 'pendentes',
+                            ])
+                        );
+                    }), //novo Assim, quando a página recarrega, ela lê a URL e ajusta o filtro da 
+                    //tabela para mostrar pendentes, sem confusão de estado.
 
-                EditAction::make()
+                ViewAction::make('View')
+                    ->label('Ver Evento'),
+
+                EditAction::make('Edit')
+                    ->label('Editar')
                     ->visible(fn($record) => $record?->deleted_at === null && $record?->status !== 'done'),
             ])
 
