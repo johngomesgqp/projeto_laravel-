@@ -27,6 +27,9 @@ class EventResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'agendamento';
+    protected static ?string $modelLabel = 'Evento';
+    protected static ?string $pluralModelLabel = 'Eventos';
+    protected static ?string $navigationLabel = 'Eventos';
 
     public static function form(Schema $schema): Schema
     {
@@ -57,7 +60,7 @@ class EventResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -68,4 +71,3 @@ class EventResource extends Resource
         ];
     }
 }
-
